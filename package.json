@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev:tsc": "tsc --watch",
-    "dev:bridge": ". ./env.sh && nodemon build/bridge.js",
+    "dev:bridge": ". ./env.sh && nodemon build/app.js",
     "dev:target": ". ./env.sh && nodemon build/target.js",
     "build": "tsc",
     "lint": "eslint .",
@@ -41,6 +41,7 @@
     "typescript": "^4.9.5"
   },
   "dependencies": {
+    "@sentry/node": "^7.54.0",
     "@xmtp/xmtp-js": "^9.0.1",
     "express": "^4.18.2",
     "node-fetch": "^3.3.1",
