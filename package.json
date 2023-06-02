@@ -8,8 +8,9 @@
   },
   "scripts": {
     "dev:tsc": "tsc --watch",
-    "dev:bridge": ". ./env.sh && nodemon build/app.js",
-    "dev:target": ". ./env.sh && nodemon build/target.js",
+    "dev:bridge": ". ./shell/env.sh && nodemon build/app.js",
+    "dev:cache": ". ./shell/env.sh && nodemon build/cache.js",
+    "dev:target": ". ./shell/env.sh && nodemon build/target.js",
     "build": "tsc",
     "lint": "eslint .",
     "prettier": "prettier --check .",

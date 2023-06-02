@@ -1,16 +1,26 @@
-import { Client, DecodedMessage, Conversation } from "@xmtp/xmtp-js";
-import { config } from "./config.js";
+import { Client, DecodedMessage } from "@xmtp/xmtp-js";
+import { Wallet } from "@ethersproject/wallet";
+import { app } from "./env.js";
+import * as Sentry from "@sentry/node";
 
-export const bridge = async () => {
-  /*
-   * Initialize client
-   */
+const env = app();
 
-  const client = await Client.create(config.wallet, { env: "production" });
+Sentry.init({
+  dsn: env.sentry.dsn,
+});
 
-  /*
-   * Listen for messages
-   */
+export type Listener = ({
+  message,
+  server,
+}: {
+  message: DecodedMessage;
+  server: { address: string; reply: (msg: string) => Promise<void> };
+}) => void;
+
+export const bridge = async (opts: { privateKey: string }) => {
+  const wallet = new Wallet(opts.privateKey);
+
+  const client = await Client.create(wallet, { env: "production" });
 
   const listeners: Array<(msg: DecodedMessage) => void> = [];
   (async () => {
@@ -23,26 +33,33 @@ export const bridge = async () => {
       }
     })();
   })();
-  const addListener = (listener: (msg: DecodedMessage) => void) => {
-    listeners.push(listener);
-  };
 
-  /*
-   * Send messages
-   */
+  const addListener = (listener: Listener) => {
+    listeners.push((message) => {
+      const transaction = Sentry.startTransaction({
+        name: "bridge",
+      });
 
-  const reply = async ({
-    conversation,
-    message,
-  }: {
-    conversation: Conversation;
-    message: string;
-  }) => {
-    return await conversation.send(message);
+      try {
+        listener({
+          message,
+          server: {
+            address: client.address,
+            reply: async (msg) => {
+              await message.conversation.send(msg);
+            },
+          },
+        });
+      } catch (error) {
+        Sentry.captureException(error);
+      } finally {
+        transaction.finish();
+      }
+    });
   };
 
   return {
+    address: client.address,
     addListener,
-    reply,
   };
 };

@@ -1,30 +1,10 @@
 import { z } from "zod";
-import { config } from "./config.js";
+import { app } from "./env.js";
+import { DecodedMessage } from "@xmtp/xmtp-js";
 import fetch from "node-fetch";
+import { parse } from "./lib.js";
 
-export const zValidMessage = z.object({
-  senderAddress: z.string().superRefine((val, ctx) => {
-    if (val === config.wallet.address) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Sender address cannot be the same as the bridge address",
-      });
-    } else {
-      return val;
-    }
-  }),
-  conversation: z.object({
-    peerAddress: z.string(),
-    context: z
-      .object({
-        conversationId: z.string(),
-      })
-      .optional(),
-  }),
-  content: z.string(),
-});
-
-export type ValidMessage = z.infer<typeof zValidMessage>;
+const env = app();
 
 export const zTargetRequest = z.object({
   url: z.string(),
@@ -50,29 +30,33 @@ export const zTargetRequest = z.object({
 
 export type TargetRequest = z.infer<typeof zTargetRequest>;
 
-export const zMapValidMessageToTargetRequest = zValidMessage.transform(
-  (val) => {
-    return zTargetRequest.parse({
-      method: config.targetOptions.method,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      url: config.targetOptions.url,
-      body: {
-        bridgePeerAddress: config.wallet.address,
-        message: {
-          conversation: {
-            peerAddress: val.senderAddress,
-            context: {
-              conversationId: val.conversation.peerAddress,
-            },
+export const mapMessageToTargetRequest = ({
+  message,
+  bridgePeerAddress,
+}: {
+  message: DecodedMessage;
+  bridgePeerAddress: string;
+}): TargetRequest => {
+  return {
+    method: env.targetOptions.method,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    url: env.targetOptions.url,
+    body: {
+      bridgePeerAddress,
+      message: {
+        conversation: {
+          peerAddress: message.senderAddress,
+          context: {
+            conversationId: message.conversation.peerAddress,
           },
-          content: val.content,
         },
+        content: message.content,
       },
-    });
-  }
-);
+    },
+  };
+};
 
 export const zTargetResponsePayload = z.object({
   ok: z.literal(true),
@@ -86,3 +70,39 @@ export const zMapTargetResponseToContent = zTargetResponsePayload.transform(
     return val.data;
   }
 );
+
+export const handler = async ({
+  message,
+  server,
+}: {
+  server: {
+    address: string;
+    reply: (msg: string) => void;
+  };
+  message: DecodedMessage;
+}): Promise<void> => {
+  if (message.senderAddress === server.address) {
+    return;
+  }
+
+  const request = mapMessageToTargetRequest({
+    message,
+    bridgePeerAddress: server.address,
+  });
+
+  const response = await fetch(env.targetOptions.url, {
+    headers: request.headers,
+    method: request.method,
+    body: JSON.stringify(request.body),
+  });
+
+  const json = await response.json();
+
+  const content = parse({
+    message: "Target response validation failed",
+    val: json,
+    schema: zMapTargetResponseToContent,
+  });
+
+  await server.reply(content);
+};
