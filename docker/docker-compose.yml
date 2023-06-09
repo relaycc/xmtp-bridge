@@ -1,1 +1,55 @@
-# TODO
+version: '3.8'
+services:
+  bridge:
+    build:
+      context: "../nodejs"
+      dockerfile: "../docker/Dockerfile"
+    command: node build/app.js
+    restart: always
+    environment:
+      - BOOT_MODE
+      - KEY_TO_BOOT
+      - TARGET_URL=http://target:3002
+      - TARGET_METHOD
+      - SENTRY_DSN
+      - BOOT_CONFIG_FILE_PATH=/app/shell/boot.json
+      - CACHE_URL=http://cache:3001
+      - CACHE_PORT
+    depends_on:
+      - cache
+  cache:
+    build:
+      context: "../nodejs"
+      dockerfile: "../docker/Dockerfile"
+    command: node build/cache.js
+    restart: always
+    ports:
+      - '3001:3001'
+    environment:
+      - BOOT_MODE
+      - KEY_TO_BOOT
+      - TARGET_URL=http://target:3002
+      - TARGET_METHOD
+      - SENTRY_DSN
+      - BOOT_CONFIG_FILE_PATH=/app/shell/boot.json
+      - CACHE_URL=http://cache:3001
+      - CACHE_PORT
+    volumes:
+      - ../shell/boot.json:/app/shell/boot.json
+  target:
+    build:
+      context: "../nodejs"
+      dockerfile: "../docker/Dockerfile"
+    command: node build/target.js
+    restart: always
+    ports:
+      - '3002:3002'
+    environment:
+      - BOOT_MODE
+      - KEY_TO_BOOT
+      - TARGET_URL=http://target:3002
+      - TARGET_METHOD
+      - SENTRY_DSN
+      - BOOT_CONFIG_FILE_PATH=/app/shell/boot.json
+      - CACHE_URL=http://cache:3001
+      - CACHE_PORT

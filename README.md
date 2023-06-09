@@ -39,3 +39,9 @@ forwarding to: `npm run dev:target`.
 
 At this point, you should be able to send an XMTP message to any address
 corresponding to one of the bridges and then receive a response.
+
+# Manage It
+
+You can spin up a local environment with `npm run dev:up`. This will start the
+cache, bridge, and target services.
+

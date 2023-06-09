@@ -19,6 +19,8 @@ export type Listener = ({
 
 export const bridge = async (opts: { privateKey: string }) => {
   const wallet = new Wallet(opts.privateKey);
+  /* eslint-disable-next-line no-console */
+  console.log("address", wallet.address)
 
   const client = await Client.create(wallet, { env: "production" });
 
