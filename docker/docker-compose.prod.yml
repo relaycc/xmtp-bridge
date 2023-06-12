@@ -10,11 +10,11 @@ services:
       - BOOT_MODE
       - KEY_TO_BOOT
       - TARGET_URL=http://target:3000
-      - TARGET_METHOD
+      - TARGET_METHOD=POST
       - SENTRY_DSN
-      - BOOT_CONFIG_FILE_PATH
+      - BOOT_CONFIG_FILE_PATH=/app/shell/boot.json
       - CACHE_URL=http://cache:3001
-      - CACHE_PORT
+      - CACHE_PORT=3001
     depends_on:
       - cache
   cache:
@@ -29,14 +29,14 @@ services:
       - BOOT_MODE
       - KEY_TO_BOOT
       - TARGET_URL=http://target:3000
-      - TARGET_METHOD
+      - TARGET_METHOD=POST
       - SENTRY_DSN
-      - BOOT_CONFIG_FILE_PATH
+      - BOOT_CONFIG_FILE_PATH=/app/shell/boot.json
       - CACHE_URL=http://cache:3001
       - CACHE_PORT=3001
     volumes:
       - type: bind
-        source: ../shell/boot.json
+        source: /root/app/boot.json
         target: /app/shell/boot.json
   target:
     build:
@@ -50,8 +50,8 @@ services:
       - BOOT_MODE
       - KEY_TO_BOOT
       - TARGET_URL=http://target:3000
-      - TARGET_METHOD
+      - TARGET_METHOD=POST
       - SENTRY_DSN
-      - BOOT_CONFIG_FILE_PATH
+      - BOOT_CONFIG_FILE_PATH=/app/shell/boot.json
       - CACHE_URL=http://cache:3001
       - CACHE_PORT=3001
