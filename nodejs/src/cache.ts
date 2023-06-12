@@ -35,11 +35,6 @@ app.post("/", (_req, res) => {
   });
 });
 
-app.post("/push", (_req, res) => {
-  KEYS_CACHE.keysToBoot.push(_req.body.key);
-  res.send({});
-});
-
 app.listen(env.bootOptions.port, () => {
   /* eslint-disable-next-line no-console */
   console.log(`Boot service listening on port ${env.bootOptions.port}`);

@@ -12,7 +12,7 @@ services:
       - TARGET_URL=http://target:3002
       - TARGET_METHOD
       - SENTRY_DSN
-      - BOOT_CONFIG_FILE_PATH=/app/shell/boot.json
+      - BOOT_CONFIG_FILE_PATH
       - CACHE_URL=http://cache:3001
       - CACHE_PORT
     depends_on:
@@ -31,7 +31,7 @@ services:
       - TARGET_URL=http://target:3002
       - TARGET_METHOD
       - SENTRY_DSN
-      - BOOT_CONFIG_FILE_PATH=/app/shell/boot.json
+      - BOOT_CONFIG_FILE_PATH
       - CACHE_URL=http://cache:3001
       - CACHE_PORT
     volumes:
@@ -50,6 +50,6 @@ services:
       - TARGET_URL=http://target:3002
       - TARGET_METHOD
       - SENTRY_DSN
-      - BOOT_CONFIG_FILE_PATH=/app/shell/boot.json
+      - BOOT_CONFIG_FILE_PATH
       - CACHE_URL=http://cache:3001
       - CACHE_PORT
