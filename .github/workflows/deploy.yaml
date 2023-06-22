@@ -3,14 +3,6 @@ name: bridge_deploy
 on:
   workflow_dispatch:
     inputs:
-      boot_mode:
-        description: 'Boot Mode'
-        required: true
-        default: 'env'
-        type: choice
-        options:
-          - network
-          - env
       boot_config:
         description: 'Boot Config File'
         required: false
@@ -33,7 +25,6 @@ jobs:
           XMTP_BRIDGE_DROPLET_PK: ${{ secrets.XMTP_BRIDGE_DROPLET_PK }}
           XMTP_BRIDGE_DROPLET_IP: ${{ secrets.XMTP_BRIDGE_DROPLET_IP }}
           BOOT_CONFIG_B64: ${{ inputs.boot_config }}
-          _BOOT_MODE: ${{ inputs.boot_mode }}
           _KEY_TO_BOOT: ${{ inputs.key_to_boot }}
           _SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: |
