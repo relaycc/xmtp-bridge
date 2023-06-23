@@ -22,10 +22,12 @@ jobs:
 
       - name: Deploy
         env:
-          XMTP_BRIDGE_DROPLET_PK: ${{ secrets.XMTP_BRIDGE_DROPLET_PK }}
-          XMTP_BRIDGE_DROPLET_IP: ${{ secrets.XMTP_BRIDGE_DROPLET_IP }}
+          DROPLET_PK: ${{ secrets.XMTP_BRIDGE_DROPLET_PK }}
+          DROPLET_IP: ${{ secrets.XMTP_BRIDGE_DROPLET_IP }}
           BOOT_CONFIG_B64: ${{ inputs.boot_config }}
           _KEY_TO_BOOT: ${{ inputs.key_to_boot }}
           _SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: |
-          ./shell/bridge.deploy.sh
+          cd nodejs
+          npm run prod:up
+
