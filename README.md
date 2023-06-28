@@ -20,6 +20,10 @@ calls an HTTP API and then sends a response message via XMTP.
 - protocol.ts contains the request-response types and handler used to forward
   messages from XMTP to HTTP.
 
+# Quickstart
+
+`npm run dev:up` and follow the error messages.
+
 # Run It
 
 You can either start the system in network boot mode or in env boot mode.
