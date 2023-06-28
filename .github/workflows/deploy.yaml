@@ -1,16 +1,8 @@
-name: Deploy Bridge
+name: bridge_deploy
 
 on:
   workflow_dispatch:
     inputs:
-      boot_mode:
-        description: 'Boot Mode'
-        required: true
-        default: 'netowrk'
-        type: choice
-        options:
-          - netowrk
-          - env
       boot_config:
         description: 'Boot Config File'
         required: false
@@ -30,16 +22,12 @@ jobs:
 
       - name: Deploy
         env:
-          XMTP_BRIDGE_DROPLET_PK: ${{ secrets.XMTP_BRIDGE_DROPLET_PK }}
-          XMTP_BRIDGE_DROPLET_IP: ${{ secrets.XMTP_BRIDGE_DROPLET_IP }}
+          DROPLET_PK: ${{ secrets.XMTP_BRIDGE_DROPLET_PK }}
+          DROPLET_IP: ${{ secrets.XMTP_BRIDGE_DROPLET_IP }}
           BOOT_CONFIG_B64: ${{ inputs.boot_config }}
-          BOOT_MODE: ${{ inputs.boot_mode }}
-          KEY_TO_BOOT: ${{ inputs.key_to_boot }}
-          TARGET_URL: http://target:3002
-          TARGET_METHOD: "POST"
-          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-          BOOT_CONFIG_FILE_PATH: /app/shell/boot.json
-          CACHE_URL: http://cache:3001
-          CACHE_PORT: "3001"
+          _KEY_TO_BOOT: ${{ inputs.key_to_boot }}
+          _SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: |
-          ./shell/bridge.deploy.sh
+          cd nodejs
+          npm run prod:up
+
