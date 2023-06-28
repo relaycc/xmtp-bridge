@@ -6,6 +6,23 @@ Deploy a docker-compose cluster of XMTP clients on a single host. Each XMTP
 client listens for messages and calls a message handler. The message handler
 calls an HTTP API and then sends a response message via XMTP.
 
+# QUICKSTART
+create a file `shell/boot.json` with the following contents
+```bash
+[
+  "0xcb6dfc687a5a568d35ba6754febe8f551a8766cdfbade993501dba51d3e8c2ea",
+  "0x3f4c58fa5efd04868c33b8ca68c6264ca1f0147416582918b455582fe5fc8de2"
+]
+```
+
+run this command
+```bash
+cd nodejs && . ../shell/example_env.sh && npm run dev:up
+```
+
+You can get the public address to message by getting logs from the bridge container
+`docker logs docker-bridge-1`
+
 # How It Works
 
 - app.ts is the executable file for each bridge instance

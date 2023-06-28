@@ -1,4 +1,5 @@
 node_modules/
 build/
 **/*_env.sh
+!**/example_env.sh
 **boot.json
