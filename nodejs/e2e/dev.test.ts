@@ -1,3 +1,4 @@
+import fetch from "node-fetch";
 import { app } from "../src/env.js";
 
 describe("Spin up a dev environment", () => {
@@ -17,5 +18,34 @@ describe("Spin up a dev environment", () => {
     throw new Error(
       "HTTP target isn't running, did you run npm run dev:target?"
     );
+  });
+});
+
+/*
+ * TODO - The values in this test need to be parameterized in some way!
+ */
+describe("Smoke tests", () => {
+  it("Hooks works", async () => {
+    try {
+      const response = await fetch("http://localhost:3001/hook", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: "Hello from the webhook!",
+          fromAddress: "0x4779309458EE31Bf9f06181ACE85d76dbA25F1Cd",
+          targetAddress: "0xf89773CF7cf0B560BC5003a6963b98152D84A15a",
+          token: "0.58574962157360420.98133344551815820.5149317891803253",
+        }),
+      });
+      if (response.status !== 200) {
+        throw new Error("Bad status code " + response.status);
+      } else {
+        console.log(await response.json());
+      }
+    } catch (e) {
+      throw e;
+    }
   });
 });

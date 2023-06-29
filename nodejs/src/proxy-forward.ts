@@ -3,6 +3,7 @@ import { app } from "./env.js";
 import { DecodedMessage } from "@xmtp/xmtp-js";
 import fetch from "node-fetch";
 import { parse } from "./lib.js";
+import { Bridge, reply } from "./bridge.js";
 
 const env = app();
 
@@ -73,21 +74,18 @@ export const zMapTargetResponseToContent = zTargetResponsePayload.transform(
 
 export const handler = async ({
   message,
-  server,
+  bridge,
 }: {
-  server: {
-    address: string;
-    reply: (msg: string) => void;
-  };
+  bridge: Bridge;
   message: DecodedMessage;
 }): Promise<void> => {
-  if (message.senderAddress === server.address) {
+  if (message.senderAddress === bridge.address) {
     return;
   }
 
   const request = mapMessageToTargetRequest({
     message,
-    bridgePeerAddress: server.address,
+    bridgePeerAddress: bridge.address,
   });
 
   const response = await fetch(env.targetOptions.url, {
@@ -104,5 +102,5 @@ export const handler = async ({
     schema: zMapTargetResponseToContent,
   });
 
-  await server.reply(content);
+  await reply({ to: message, msg: content });
 };

@@ -1,10 +1,11 @@
-import { bridge } from "../bridge.js";
+import { bridge, addHandler } from "../bridge.js";
 import fetch from "node-fetch";
 import { Wallet } from "@ethersproject/wallet";
 import { z } from "zod";
 import { parse } from "../lib.js";
 import { app } from "../env.js";
-import { handler } from "../protocol.js";
+import * as Forward from "../proxy-forward.js";
+import * as Reverse from "../proxy-reverse.js";
 
 const env = app();
 
@@ -38,5 +39,6 @@ const zBootResponse = z.object({
 
   const server = await bridge({ privateKey });
 
-  server.addListener(handler);
+  addHandler(server, Forward.handler);
+  addHandler(server, Reverse.handler);
 })();

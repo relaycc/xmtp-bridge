@@ -1,8 +1,10 @@
+import { z } from "zod";
 import * as fs from "fs/promises";
 import { Wallet } from "@ethersproject/wallet";
-import { cache } from "../src/env.js";
+import { api } from "../src/env.js";
+import { prisma } from "../src/db.js";
 
-const env = cache();
+const env = api();
 
 describe("Workbench:*", async () => {
   it("Generates boot config", async () => {
@@ -12,12 +14,6 @@ describe("Workbench:*", async () => {
       Wallet.createRandom(),
     ];
 
-    console.log("Writing boot config to " + env.bootOptions.configFilePath);
-    console.log(
-      "Addresses are",
-      wallets.map((wallet) => wallet.address)
-    );
-
     await fs.writeFile(
       env.bootOptions.configFilePath,
       JSON.stringify(
@@ -26,5 +22,24 @@ describe("Workbench:*", async () => {
         2
       )
     );
+  });
+
+  it("Adds bridge records corresponding to the boot config", async () => {
+    const bootConfig = z
+      .array(z.string())
+      .parse(
+        JSON.parse(await fs.readFile(env.bootOptions.configFilePath, "utf-8"))
+      );
+
+    for (const privateKey of bootConfig) {
+      const wallet = new Wallet(privateKey);
+
+      await prisma.bridge.create({
+        data: {
+          ethAddress: wallet.address,
+          hookToken: `${Math.random()}${Math.random()}${Math.random()}`,
+        },
+      });
+    }
   });
 });

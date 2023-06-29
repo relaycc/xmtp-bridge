@@ -1,0 +1,16 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("PG_CONNECTION_STRING")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Bridge {
+  id         Int      @id @default(autoincrement())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  ethAddress String   @unique
+  hookToken  String
+}

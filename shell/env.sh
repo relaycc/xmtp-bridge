@@ -97,3 +97,27 @@ if [ -z $_CACHE_PORT ]; then
 fi
 
 export CACHE_PORT=$_CACHE_PORT
+
+#
+# WEBHOOK_KEY is the address that the webhook server will use to send
+# messages to bridge instances.
+#
+
+if [ -z $_WEBHOOK_KEY ]; then
+  echo "ERROR env.sh :: _WEBHOOK_KEY not set."
+  exit 1
+fi
+
+export WEBHOOK_KEY=$_WEBHOOK_KEY
+
+#
+# The connection string for the project's postgres database.
+#
+#
+
+if [ -z $_PG_CONNECTION_STRING ]; then
+  echo "ERROR :: ./shell/env.sh :: Must set _PG_CONNECTION_STRING"
+  exit 1
+else
+  export PG_CONNECTION_STRING=${_PG_CONNECTION_STRING}
+fi

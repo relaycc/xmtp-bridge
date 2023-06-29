@@ -33,6 +33,7 @@ const zAppEnv = z.object({
   bootOptions: zBootFromNetwork.or(zBootFromEnv),
   targetOptions: zTargetOptions,
   sentry: zSentry,
+  webhookAddress: z.string(),
 });
 
 export const app = () => {
@@ -59,14 +60,17 @@ export const app = () => {
     sentry: {
       dsn: process.env.SENTRY_DSN,
     },
+    webhookAddress: new Wallet(process.env.WEBHOOK_KEY as string).address,
   });
 };
 
 export const zCacheEnv = z.object({
   bootOptions: zBootFromNetwork,
+  webhookAddress: z.string(),
+  webhookKey: z.string(),
 });
 
-export const cache = () => {
+export const api = () => {
   return zCacheEnv.parse({
     bootOptions: {
       mode: process.env.BOOT_MODE,
@@ -74,5 +78,7 @@ export const cache = () => {
       url: process.env.CACHE_URL,
       port: process.env.CACHE_PORT,
     },
+    webhookAddress: new Wallet(process.env.WEBHOOK_KEY as string).address,
+    webhookKey: process.env.WEBHOOK_KEY,
   });
 };
