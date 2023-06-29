@@ -1,11 +1,10 @@
-/* eslint-disable no-console */
-import { bridge } from "./bridge.js";
+import { bridge } from "../bridge.js";
 import fetch from "node-fetch";
 import { Wallet } from "@ethersproject/wallet";
 import { z } from "zod";
-import { parse } from "./lib.js";
-import { app } from "./env.js";
-import { handler } from "./protocol.js";
+import { parse } from "../lib.js";
+import { app } from "../env.js";
+import { handler } from "../protocol.js";
 
 const env = app();
 
