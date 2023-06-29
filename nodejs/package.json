@@ -15,6 +15,7 @@
     "dev:down": "docker compose -f ../docker/docker-compose.yml down",
     "prod:up": "../shell/bridge.deploy.sh",
     "test:dev": ". ../shell/env.sh && mocha build/e2e/dev.test.js",
+    "test:bench": ". ../shell/env.sh && mocha -g Workbench",
     "static:build": "tsc",
     "lint": "eslint .",
     "prettier": "prettier --check .",

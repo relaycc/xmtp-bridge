@@ -1,9 +1,9 @@
 import express from "express";
 import { readFileSync } from "fs";
-import { cache } from "./env.js";
+import { cache } from "../env.js";
 import { Wallet } from "@ethersproject/wallet";
 import { z } from "zod";
-import { parse } from "./lib.js";
+import { parse } from "../lib.js";
 
 const env = cache();
 
