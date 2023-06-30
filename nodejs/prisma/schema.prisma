@@ -8,9 +8,20 @@ generator client {
 }
 
 model Bridge {
-  id         Int      @id @default(autoincrement())
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  ethAddress String   @unique
+  id         String    @id @default(uuid())
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  ethAddress String    @unique
+  bootKey    String
   hookToken  String
+  httpUrl    String
+  instance   Instance?
+}
+
+model Instance {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  bridge    Bridge   @relation(fields: [bridgeId], references: [id])
+  bridgeId  String   @unique
+  heartbeat DateTime @default(now())
 }

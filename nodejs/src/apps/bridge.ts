@@ -6,6 +6,7 @@ import { parse } from "../lib.js";
 import { app } from "../env.js";
 import * as Forward from "../proxy-forward.js";
 import * as Reverse from "../proxy-reverse.js";
+import { pickBridgeToBoot } from "../boot.js";
 
 const env = app();
 
@@ -18,27 +19,14 @@ const zBootResponse = z.object({
 });
 
 (async () => {
-  const privateKey = await (async () => {
-    if (env.bootOptions.mode === "env") {
-      return env.bootOptions.fromKey;
-    } else {
-      const response = await fetch(env.bootOptions.url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+  const bridgeToBoot = await pickBridgeToBoot();
 
-      return parse({
-        schema: zBootResponse,
-        message: "Boot key response validation failed",
-        val: await response.json(),
-      }).keyToBoot;
-    }
-  })();
+  if (!bridgeToBoot) {
+    throw new Error("No bridge to boot");
+  } else {
+    const server = await bridge({ privateKey: bridgeToBoot.bootKey });
 
-  const server = await bridge({ privateKey });
-
-  addHandler(server, Forward.handler);
-  addHandler(server, Reverse.handler);
+    addHandler(server, Forward.handler);
+    addHandler(server, Reverse.handler);
+  }
 })();
