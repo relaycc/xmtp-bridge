@@ -37,3 +37,11 @@ export const zJsonString = z.string().transform((val, ctx) => {
     return z.NEVER;
   }
 });
+
+export const getRandom = <T>(arr: T[]): T => {
+  return arr[Math.floor(Math.random() * arr.length)];
+};
+
+export const sleep = (ms: number): Promise<void> => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};

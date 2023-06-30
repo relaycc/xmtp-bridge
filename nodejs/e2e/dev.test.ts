@@ -48,4 +48,26 @@ describe("Smoke tests", () => {
       throw e;
     }
   });
+
+  it("Signup works", async () => {
+    try {
+      const response = await fetch("http://localhost:3001/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          key: process.env.SIGNUP_KEY,
+          httpUrl: "http://locallhost:3000",
+        }),
+      });
+      if (response.status !== 200) {
+        throw new Error("Bad status code " + response.status);
+      } else {
+        console.log(await response.json());
+      }
+    } catch (e) {
+      throw e;
+    }
+  });
 });

@@ -1,29 +1,30 @@
 import { bridge, addHandler } from "../bridge.js";
-import fetch from "node-fetch";
-import { Wallet } from "@ethersproject/wallet";
-import { z } from "zod";
-import { parse } from "../lib.js";
-import { app } from "../env.js";
 import * as Forward from "../proxy-forward.js";
 import * as Reverse from "../proxy-reverse.js";
 import { pickBridgeToBoot } from "../boot.js";
-
-const env = app();
-
-const zBootResponse = z.object({
-  ok: z.literal(true),
-  keyToBoot: z.string().refine((val) => {
-    new Wallet(val);
-    return true;
-  }),
-});
+import { prisma } from "../db.js";
+import { BRIDGE_HEARTBEAT_TIMEOUT_MS } from "../canary.js";
 
 (async () => {
   const bridgeToBoot = await pickBridgeToBoot();
 
-  if (!bridgeToBoot) {
-    throw new Error("No bridge to boot");
+  if (bridgeToBoot === null) {
+    /* TODO - Log this. We don't do anything because we assume that we will
+     * always have more running containers than bridges to boot. */
   } else {
+    (async () => {
+      setInterval(async () => {
+        prisma.instance.update({
+          where: {
+            bridgeId: bridgeToBoot.id,
+          },
+          data: {
+            heartbeat: new Date(),
+          },
+        });
+      }, BRIDGE_HEARTBEAT_TIMEOUT_MS / 2);
+    })();
+
     const server = await bridge({ privateKey: bridgeToBoot.bootKey });
 
     addHandler(server, Forward.handler);

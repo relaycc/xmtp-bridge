@@ -1,10 +1,7 @@
 import { z } from "zod";
 import * as fs from "fs/promises";
 import { Wallet } from "@ethersproject/wallet";
-import { api } from "../src/env.js";
 import { prisma } from "../src/db.js";
-
-const env = api();
 
 describe("Workbench:*", async () => {
   it("Generates boot config", async () => {
@@ -15,7 +12,7 @@ describe("Workbench:*", async () => {
     ];
 
     await fs.writeFile(
-      env.bootOptions.configFilePath,
+      process.env.BOOT_CONFIG_FILE_PATH as string,
       JSON.stringify(
         wallets.map((wallet) => wallet.privateKey),
         null,
@@ -28,7 +25,12 @@ describe("Workbench:*", async () => {
     const bootConfig = z
       .array(z.string())
       .parse(
-        JSON.parse(await fs.readFile(env.bootOptions.configFilePath, "utf-8"))
+        JSON.parse(
+          await fs.readFile(
+            process.env.BOOT_CONFIG_FILE_PATH as string,
+            "utf-8"
+          )
+        )
       );
 
     for (const privateKey of bootConfig) {
@@ -38,6 +40,8 @@ describe("Workbench:*", async () => {
         data: {
           ethAddress: wallet.address,
           hookToken: `${Math.random()}${Math.random()}${Math.random()}`,
+          bootKey: wallet.privateKey,
+          httpUrl: "http://canary:3000",
         },
       });
     }

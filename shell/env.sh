@@ -111,6 +111,18 @@ fi
 export WEBHOOK_KEY=$_WEBHOOK_KEY
 
 #
+# CANARY_KEY is the address that the canry server will use to send
+# messages to bridge instances.
+#
+
+if [ -z $_CANARY_KEY ]; then
+  echo "ERROR env.sh :: _CANARY_KEY not set."
+  exit 1
+fi
+
+export CANARY_KEY=$_CANARY_KEY
+
+#
 # The connection string for the project's postgres database.
 #
 #
@@ -120,4 +132,16 @@ if [ -z $_PG_CONNECTION_STRING ]; then
   exit 1
 else
   export PG_CONNECTION_STRING=${_PG_CONNECTION_STRING}
+fi
+
+#
+# The key we use to authenticate the /signup endpoint
+#
+#
+
+if [ -z $_SIGNUP_KEY ]; then
+  echo "ERROR :: ./shell/env.sh :: Must set _SIGNUP_KEY"
+  exit 1
+else
+  export SIGNUP_KEY=${_SIGNUP_KEY}
 fi

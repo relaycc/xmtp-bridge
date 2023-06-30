@@ -1,11 +1,11 @@
 import express from "express";
-import { readFileSync } from "fs";
 import { api } from "../env.js";
-import { Wallet } from "@ethersproject/wallet";
 import { z } from "zod";
 import { parse } from "../lib.js";
 import * as Bridge from "../bridge.js";
 import { prisma } from "../db.js";
+import { Wallet } from "@ethersproject/wallet";
+import { v4 as uuid } from "uuid";
 
 const env = api();
 
@@ -13,33 +13,9 @@ const bridge = Bridge.bridge({
   privateKey: env.webhookKey,
 });
 
-const zBootKeys = z.string().transform((val) => {
-  const json = JSON.parse(val);
-  const keys = z.array(z.string()).parse(json);
-  const wallets = keys.map((key) => new Wallet(key));
-  return wallets.map((wallet) => wallet.privateKey);
-});
-
-const keysToBoot = parse({
-  message: "Boot config file must be a JSON array of private keys",
-  schema: zBootKeys,
-  val: readFileSync(env.bootOptions.configFilePath).toString(),
-});
-
-const KEYS_CACHE = {
-  keysToBoot,
-};
-
 const app = express();
 
 app.use(express.json());
-
-app.post("/", (_req, res) => {
-  res.send({
-    ok: true,
-    keyToBoot: KEYS_CACHE.keysToBoot.pop(),
-  });
-});
 
 const zHookBody = z.object({
   fromAddress: z.string(),
@@ -94,7 +70,48 @@ app.post("/hook", async (req, res) => {
   });
 });
 
-app.listen(env.bootOptions.port, () => {
+const zSignupBody = z.object({
+  key: z.string(),
+  httpUrl: z.string(),
+});
+
+app.post("/signup", async (req, res) => {
+  const validatedBody = parse({
+    message: "Signup body validation failed",
+    schema: zSignupBody,
+    val: req.body,
+  });
+
+  if (validatedBody.key !== env.signupKey) {
+    console.log("validatedBody.key", validatedBody.key);
+    console.log("env.signupKey", env.signupKey);
+    res.status(401).send({
+      ok: false,
+      error: "Invalid key",
+    });
+    return;
+  }
+
+  const wallet = Wallet.createRandom();
+
+  const createdBridge = await prisma.bridge.create({
+    data: {
+      ethAddress: wallet.address,
+      bootKey: wallet.privateKey,
+      /* TODO: uuid is not technically cryptographically secure, this is a BIG TODO */
+      hookToken: uuid(),
+      httpUrl: validatedBody.httpUrl,
+    },
+  });
+
+  res.send({
+    ok: true,
+    ethAddress: createdBridge.ethAddress,
+    hookToken: createdBridge.hookToken,
+  });
+});
+
+app.listen(env.port, () => {
   /* eslint-disable-next-line no-console */
-  console.log(`Boot service listening on port ${env.bootOptions.port}`);
+  console.log(`Boot service listening on port ${env.port}`);
 });
