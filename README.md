@@ -22,7 +22,7 @@ calls an HTTP API and then sends a response message via XMTP.
 
 # Quickstart
 
-`npm run dev:up` and follow the error messages.
+`npm run test:dev` and follow the error messages.
 
 # Run It
 

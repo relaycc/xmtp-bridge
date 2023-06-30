@@ -3,9 +3,12 @@ import { app } from "./env.js";
 import { DecodedMessage } from "@xmtp/xmtp-js";
 import fetch from "node-fetch";
 import { parse } from "./lib.js";
+import { Bridge, reply } from "./bridge.js";
 
 const env = app();
 
+/* TODO -- This should be documented, HTTP targets MUST accept the following
+ * request format. */
 export const zTargetRequest = z.object({
   url: z.string(),
   method: z.literal("POST"),
@@ -33,16 +36,18 @@ export type TargetRequest = z.infer<typeof zTargetRequest>;
 export const mapMessageToTargetRequest = ({
   message,
   bridgePeerAddress,
+  targetUrl,
 }: {
   message: DecodedMessage;
   bridgePeerAddress: string;
+  targetUrl: string;
 }): TargetRequest => {
   return {
-    method: env.targetOptions.method,
+    method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    url: env.targetOptions.url,
+    url: targetUrl,
     body: {
       bridgePeerAddress,
       message: {
@@ -71,38 +76,42 @@ export const zMapTargetResponseToContent = zTargetResponsePayload.transform(
   }
 );
 
-export const handler = async ({
-  message,
-  server,
-}: {
-  server: {
-    address: string;
-    reply: (msg: string) => void;
-  };
-  message: DecodedMessage;
-}): Promise<void> => {
-  if (message.senderAddress === server.address) {
-    return;
-  }
-
-  const request = mapMessageToTargetRequest({
+export const handler =
+  ({ targetUrl }: { targetUrl: string }) =>
+  async ({
     message,
-    bridgePeerAddress: server.address,
-  });
+    bridge,
+  }: {
+    bridge: Bridge;
+    message: DecodedMessage;
+  }): Promise<void> => {
+    if (message.senderAddress === bridge.address) {
+      return;
+    }
 
-  const response = await fetch(env.targetOptions.url, {
-    headers: request.headers,
-    method: request.method,
-    body: JSON.stringify(request.body),
-  });
+    if (message.senderAddress === env.webhookAddress) {
+      return;
+    }
 
-  const json = await response.json();
+    const request = mapMessageToTargetRequest({
+      message,
+      targetUrl,
+      bridgePeerAddress: bridge.address,
+    });
 
-  const content = parse({
-    message: "Target response validation failed",
-    val: json,
-    schema: zMapTargetResponseToContent,
-  });
+    const response = await fetch(targetUrl, {
+      headers: request.headers,
+      method: request.method,
+      body: JSON.stringify(request.body),
+    });
 
-  await server.reply(content);
-};
+    const json = await response.json();
+
+    const content = parse({
+      message: "Target response validation failed",
+      val: json,
+      schema: zMapTargetResponseToContent,
+    });
+
+    await reply({ to: message, msg: content });
+  };
