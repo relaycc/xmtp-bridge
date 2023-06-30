@@ -1,27 +1,17 @@
 import { z } from "zod";
 import { Wallet } from "@ethersproject/wallet";
 
-const zTargetOptions = z.object({
-  url: z.string().url(),
-  method: z.literal("POST"),
-});
-
 const zSentry = z.object({
   dsn: z.string().url(),
 });
 
 const zAppEnv = z.object({
-  targetOptions: zTargetOptions,
   sentry: zSentry,
   webhookAddress: z.string(),
 });
 
 export const app = () => {
   return zAppEnv.parse({
-    targetOptions: {
-      url: process.env.TARGET_URL,
-      method: process.env.TARGET_METHOD,
-    },
     sentry: {
       dsn: process.env.SENTRY_DSN,
     },

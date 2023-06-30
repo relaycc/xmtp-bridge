@@ -27,7 +27,7 @@ import { BRIDGE_HEARTBEAT_TIMEOUT_MS } from "../canary.js";
 
     const server = await bridge({ privateKey: bridgeToBoot.bootKey });
 
-    addHandler(server, Forward.handler);
+    addHandler(server, Forward.handler({ targetUrl: bridgeToBoot.httpUrl }));
     addHandler(server, Reverse.handler);
   }
 })();
