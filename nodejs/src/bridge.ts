@@ -1,18 +1,19 @@
 import { Client, DecodedMessage } from "@xmtp/xmtp-js";
 import { Wallet } from "@ethersproject/wallet";
-import { app } from "./env.js";
-import * as Sentry from "@sentry/node";
-
-const env = app();
-
-Sentry.init({
-  dsn: env.sentry.dsn,
-});
 
 export type Bridge = {
   address: string;
   listeners: Handler[];
   send: Send;
+  sentry: Sentry;
+};
+
+export type Sentry = {
+  startTransaction: (opts: { name: string }) => {
+    finish: () => void;
+  };
+
+  captureException: (error: unknown) => void;
 };
 
 export type Send = ({
@@ -33,7 +34,10 @@ export type Handler = ({
   message: DecodedMessage;
 }) => void;
 
-export const bridge = async (opts: { privateKey: string }): Promise<Bridge> => {
+export const bridge = async (opts: {
+  sentry: Sentry;
+  privateKey: string;
+}): Promise<Bridge> => {
   const wallet = new Wallet(opts.privateKey);
   /* eslint-disable-next-line no-console */
   console.log("address", wallet.address);
@@ -56,12 +60,6 @@ export const bridge = async (opts: { privateKey: string }): Promise<Bridge> => {
   })();
 
   const send: Send = async ({ toAddress, toConversationId, msg }) => {
-    console.log("Sending a message using params", {
-      fromAddress: client.address,
-      toAddress,
-      toConversationId,
-      msg,
-    });
     const conversation = await client.conversations.newConversation(
       toAddress,
       (() => {
@@ -79,6 +77,7 @@ export const bridge = async (opts: { privateKey: string }): Promise<Bridge> => {
     await conversation.send(msg);
   };
   return {
+    sentry: opts.sentry,
     address: client.address,
     send,
     listeners,
@@ -91,7 +90,7 @@ export const reply = ({ to, msg }: { to: DecodedMessage; msg: string }) => {
 
 export const addHandler = (bridge: Bridge, handler: Handler) => {
   bridge.listeners.push(({ message }) => {
-    const transaction = Sentry.startTransaction({
+    const transaction = bridge.sentry.startTransaction({
       name: "bridge",
     });
 
@@ -101,7 +100,7 @@ export const addHandler = (bridge: Bridge, handler: Handler) => {
         message,
       });
     } catch (error) {
-      Sentry.captureException(error);
+      bridge.sentry.captureException(error);
     } finally {
       transaction.finish();
     }

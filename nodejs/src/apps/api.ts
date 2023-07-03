@@ -1,5 +1,5 @@
 import express from "express";
-import { api } from "../env.js";
+import * as Env from "../env.js";
 import { z } from "zod";
 import { parse } from "../lib.js";
 import * as Bridge from "../bridge.js";
@@ -7,10 +7,11 @@ import { prisma } from "../db.js";
 import { Wallet } from "@ethersproject/wallet";
 import { v4 as uuid } from "uuid";
 
-const env = api();
+const env = Env.api();
 
 const bridge = Bridge.bridge({
   privateKey: env.webhookKey,
+  sentry: Env.sentry,
 });
 
 const app = express();
@@ -22,6 +23,20 @@ const zHookBody = z.object({
   targetAddress: z.string(),
   message: z.string(),
   token: z.string(),
+});
+
+app.get("/", async (req, res) => {
+  res.send({
+    ok: true,
+    data: "Hello from the Relay XMTP Bridge API!",
+  });
+});
+
+app.post("/canary", async (req, res) => {
+  res.send({
+    ok: true,
+    data: `Hello from the proxied server! Your message was: ${req.body.message.content}`,
+  });
 });
 
 app.post("/hook", async (req, res) => {
@@ -83,8 +98,6 @@ app.post("/signup", async (req, res) => {
   });
 
   if (validatedBody.key !== env.signupKey) {
-    console.log("validatedBody.key", validatedBody.key);
-    console.log("env.signupKey", env.signupKey);
     res.status(401).send({
       ok: false,
       error: "Invalid key",

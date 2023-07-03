@@ -1,10 +1,7 @@
 import { z } from "zod";
-import { app } from "./env.js";
 import { DecodedMessage } from "@xmtp/xmtp-js";
 import { parse, zJsonString } from "./lib.js";
 import { Bridge } from "./bridge.js";
-
-const env = app();
 
 const zSourceRequest = z.object({
   conversation: z.object({
@@ -23,27 +20,29 @@ const zSourceRequest = z.object({
   ),
 });
 
-export const handler = async ({
-  message,
-  bridge,
-}: {
-  bridge: Bridge;
-  message: DecodedMessage;
-}): Promise<void> => {
-  if (message.senderAddress !== env.webhookAddress) {
-    return;
-  }
+export const handler =
+  ({ whitelist }: { whitelist: string[] }) =>
+  async ({
+    message,
+    bridge,
+  }: {
+    bridge: Bridge;
+    message: DecodedMessage;
+  }): Promise<void> => {
+    if (!whitelist.includes(message.senderAddress)) {
+      return;
+    }
 
-  const validatedMessage = parse({
-    message: "Source request validation failed",
-    val: message,
-    schema: zSourceRequest,
-  });
+    const validatedMessage = parse({
+      message: "Source request validation failed",
+      val: message,
+      schema: zSourceRequest,
+    });
 
-  const request = validatedMessage.content;
+    const request = validatedMessage.content;
 
-  await bridge.send({
-    toAddress: request.targetAddress,
-    msg: validatedMessage.content.message,
-  });
-};
+    await bridge.send({
+      toAddress: request.targetAddress,
+      msg: validatedMessage.content.message,
+    });
+  };

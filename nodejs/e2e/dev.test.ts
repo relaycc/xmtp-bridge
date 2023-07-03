@@ -1,5 +1,4 @@
 import fetch from "node-fetch";
-import { app } from "../src/env.js";
 
 describe("Spin up a dev environment", () => {
   it("Should run the TypeScript compiler", async () => {
@@ -42,7 +41,7 @@ describe("Smoke tests", () => {
       if (response.status !== 200) {
         throw new Error("Bad status code " + response.status);
       } else {
-        console.log(await response.json());
+        // console.log(await response.json());
       }
     } catch (e) {
       throw e;
@@ -64,7 +63,7 @@ describe("Smoke tests", () => {
       if (response.status !== 200) {
         throw new Error("Bad status code " + response.status);
       } else {
-        console.log(await response.json());
+        // console.log(await response.json());
       }
     } catch (e) {
       throw e;

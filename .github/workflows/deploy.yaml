@@ -2,18 +2,9 @@ name: bridge_deploy
 
 on:
   workflow_dispatch:
-    inputs:
-      boot_config:
-        description: 'Boot Config File'
-        required: false
-        type: string
-      key_to_boot:
-        description: 'Key to Boot'
-        required: false
-        type: string
 
 jobs:
-  deploy:
+  deploy-api:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,9 +13,8 @@ jobs:
 
       - name: Deploy
         env:
-          DROPLET_PK: ${{ secrets.XMTP_BRIDGE_DROPLET_PK }}
-          DROPLET_IP: ${{ secrets.XMTP_BRIDGE_DROPLET_IP }}
-          BOOT_CONFIG_B64: ${{ inputs.boot_config }}
+          _DROPLET_PK: ${{ secrets.XMTP_BRIDGE_DROPLET_PK }}
+          _DROPLET_IP: ${{ secrets.XMTP_BRIDGE_DROPLET_IP }}
           _KEY_TO_BOOT: ${{ inputs.key_to_boot }}
           _SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: |

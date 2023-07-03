@@ -1,26 +1,26 @@
 import { z } from "zod";
 import { Wallet } from "@ethersproject/wallet";
+import * as Sentry from "@sentry/node";
 
-const zSentry = z.object({
-  dsn: z.string().url(),
+Sentry.init({
+  dsn: process.env.XMTPB_SENTRY_DSN,
 });
 
-const zAppEnv = z.object({
-  sentry: zSentry,
+export const sentry = Sentry;
+
+const zBridgeEnv = z.object({
   webhookAddress: z.string(),
+  bridgeAddress: z.string(),
 });
 
-export const app = () => {
-  return zAppEnv.parse({
-    sentry: {
-      dsn: process.env.SENTRY_DSN,
-    },
-    webhookAddress: new Wallet(process.env.WEBHOOK_KEY as string).address,
+export const bridge = () => {
+  return zBridgeEnv.parse({
+    bridgeAddress: process.env.XMTPB_BRIDGE_ADDRESS,
+    webhookAddress: new Wallet(process.env.XMTPB_WEBHOOK_KEY as string).address,
   });
 };
 
 export const zApiEnv = z.object({
-  url: z.string().url(),
   port: z.string(),
   webhookAddress: z.string(),
   webhookKey: z.string(),
@@ -29,20 +29,9 @@ export const zApiEnv = z.object({
 
 export const api = () => {
   return zApiEnv.parse({
-    url: process.env.CACHE_URL,
-    port: process.env.CACHE_PORT,
-    webhookAddress: new Wallet(process.env.WEBHOOK_KEY as string).address,
-    webhookKey: process.env.WEBHOOK_KEY,
-    signupKey: process.env.SIGNUP_KEY,
-  });
-};
-
-export const zCanaryEnv = z.object({
-  key: z.string(),
-});
-
-export const canary = () => {
-  return zCanaryEnv.parse({
-    key: process.env.CANARY_KEY,
+    port: process.env.XMTPB_API_PORT,
+    webhookAddress: new Wallet(process.env.XMTPB_WEBHOOK_KEY as string).address,
+    webhookKey: process.env.XMTPB_WEBHOOK_KEY,
+    signupKey: process.env.XMTPB_SIGNUP_KEY,
   });
 };
