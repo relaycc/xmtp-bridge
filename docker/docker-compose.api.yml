@@ -1,0 +1,46 @@
+version: "3.9"
+services:
+  api:
+    image: "bridge-api:${XMTPB_GITHUB_SHA}"
+    build:
+      context: "../nodejs"
+      dockerfile: "../docker/Dockerfile"
+    command: "node build/src/apps/api.js"
+    ports:
+      - ${XMTPB_API_PORT}:${XMTPB_API_PORT}
+    environment:
+      - XMTPB_API_URL
+      - XMTPB_API_PORT
+      - XMTPB_WEBHOOK_KEY
+      - XMTPB_SIGNUP_KEY
+      - VIRTUAL_HOST=${XMTPB_VIRTUAL_HOST}
+      - VIRTUAL_PORT=${XMTPB_VIRTUAL_PORT}
+      - LETSENCRYPT_HOST=${XMTPB_LETSENCRYPT_HOST}
+  nginx-proxy:
+    image: nginxproxy/nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - conf:/etc/nginx/conf.d
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - certs:/etc/nginx/certs:ro
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+  acme-companion:
+    image: nginxproxy/acme-companion
+    container_name: nginx-proxy-acme
+    environment:
+      - DEFAULT_EMAIL=${XMTPB_DEFAULT_EMAIL}
+    volumes_from:
+      - nginx-proxy
+    volumes:
+      - certs:/etc/nginx/certs:rw
+      - acme:/etc/acme.sh
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+volumes:
+  conf:
+  vhost:
+  html:
+  certs:
+  acme:

@@ -14,4 +14,4 @@ COPY --from=build /app/build ./build
 COPY --from=build /app/node_modules ./node_modules
 RUN mkdir -p /app/shell
 
-EXPOSE 8080
+EXPOSE 3000

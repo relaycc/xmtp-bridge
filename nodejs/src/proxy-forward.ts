@@ -1,11 +1,8 @@
 import { z } from "zod";
-import { app } from "./env.js";
 import { DecodedMessage } from "@xmtp/xmtp-js";
 import fetch from "node-fetch";
 import { parse } from "./lib.js";
 import { Bridge, reply } from "./bridge.js";
-
-const env = app();
 
 /* TODO -- This should be documented, HTTP targets MUST accept the following
  * request format. */
@@ -77,7 +74,7 @@ export const zMapTargetResponseToContent = zTargetResponsePayload.transform(
 );
 
 export const handler =
-  ({ targetUrl }: { targetUrl: string }) =>
+  ({ blacklist, targetUrl }: { blacklist: string[]; targetUrl: string }) =>
   async ({
     message,
     bridge,
@@ -85,11 +82,7 @@ export const handler =
     bridge: Bridge;
     message: DecodedMessage;
   }): Promise<void> => {
-    if (message.senderAddress === bridge.address) {
-      return;
-    }
-
-    if (message.senderAddress === env.webhookAddress) {
+    if (blacklist.includes(message.senderAddress)) {
       return;
     }
 
