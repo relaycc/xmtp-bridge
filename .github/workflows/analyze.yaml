@@ -4,6 +4,15 @@ on:
   pull_request:
     types: []
 
+env:
+  _XMTPB_API_URL: ${{ vars.ANALYZE_XMTPB_API_URL }}
+  _XMTPB_API_PORT: ${{ vars.ANALYZE_XMTPB_API_PORT }}
+  _XMTPB_WEBHOOK_KEY: ${{ secrets.ANALYZE_XMTPB_WEBHOOK_KEY }}
+  _XMTPB_PG_CONNECTION_STRING: ${{ secrets.ANALYZE_XMTPB_PG_CONNECTION_STRING }}
+  _XMTPB_POSTGRES_USER: ${{ secrets.ANALYZE_XMTPB_POSTGRES_USER }}
+  _XMTPB_POSTGRES_PASSWORD: ${{ secrets.ANALYZE_XMTPB_POSTGRES_PASSWORD }}
+  _XMTPB_SIGNUP_KEY: ${{ secrets.ANALYZE_XMTPB_SIGNUP_KEY }}
+  _XMTPB_IMAGE_TAG: ${{ vars.ANALYZE_XMTPB_IMAGE_TAG }}
 
 jobs:
   eslint:
@@ -61,6 +70,9 @@ jobs:
       - name: smoke tests
         run: |
           cd nodejs
-          npm run docker:test:smoke
+          npm run docker:api:up
+          npm run docker:api:test
+          npm run docker:bridge:up
+          npm run docker:bridge:test
 
       
