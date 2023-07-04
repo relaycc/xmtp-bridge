@@ -14,7 +14,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18.15.0
-      - name: build
+      - name: eslint
         run: |
           cd nodejs
           npm i
@@ -27,7 +27,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18.15.0
-      - name: build
+      - name: prettier
         run: |
           cd nodejs
           npm i
@@ -40,7 +40,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18.15.0
-      - name: build
+      - name: tsc
         run: |
           cd nodejs
           npm i
@@ -53,12 +53,12 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18.15.0
-      - name: build
+      - name: tsc
         run: |
           cd nodejs
           npm i
           npm run static:tsc
-      - name: test
+      - name: smoke tests
         run: |
           npm run docker:test:smoke
 
