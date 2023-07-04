@@ -18,13 +18,6 @@ const app = express();
 
 app.use(express.json());
 
-const zHookBody = z.object({
-  fromAddress: z.string(),
-  targetAddress: z.string(),
-  message: z.string(),
-  token: z.string(),
-});
-
 app.get("/", async (req, res) => {
   res.send({
     ok: true,
@@ -32,11 +25,30 @@ app.get("/", async (req, res) => {
   });
 });
 
+const zCanaryBody = z.object({
+  message: z.object({
+    content: z.string(),
+  }),
+});
+
 app.post("/canary", async (req, res) => {
+  const validatedBody = parse({
+    message: "Canary body validation failed",
+    schema: zCanaryBody,
+    val: req.body,
+  });
+
   res.send({
     ok: true,
-    data: `Hello from the proxied server! Your message was: ${req.body.message.content}`,
+    data: `Hello from the proxied server! Your message was: ${validatedBody.message.content}`,
   });
+});
+
+const zHookBody = z.object({
+  sendFromBridgeAddress: z.string(),
+  targetAddress: z.string(),
+  message: z.string(),
+  token: z.string(),
 });
 
 app.post("/hook", async (req, res) => {
@@ -48,7 +60,7 @@ app.post("/hook", async (req, res) => {
 
   const bridgeDbo = await prisma.bridge.findUnique({
     where: {
-      ethAddress: validatedBody.fromAddress,
+      ethAddress: validatedBody.sendFromBridgeAddress,
     },
   });
 
@@ -70,8 +82,8 @@ app.post("/hook", async (req, res) => {
 
   const { send } = await bridge;
 
-  await send({
-    toAddress: validatedBody.fromAddress,
+  const sent = await send({
+    toAddress: validatedBody.sendFromBridgeAddress,
     msg: JSON.stringify({
       targetAddress: validatedBody.targetAddress,
       message: validatedBody.message,
@@ -80,8 +92,12 @@ app.post("/hook", async (req, res) => {
 
   res.send({
     ok: true,
-    forwardedTo: validatedBody.targetAddress,
-    forwardedMessage: validatedBody.message,
+    forwardedToBridge: sent.recipientAddress,
+    forwardedMessage: {
+      id: sent.id,
+      content: sent.content,
+      recipientAddress: sent.recipientAddress,
+    },
   });
 });
 

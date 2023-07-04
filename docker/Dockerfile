@@ -4,7 +4,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
-RUN npm run static:build
+RUN npm run static:tsc
 
 FROM node:18.15.0 AS run
 

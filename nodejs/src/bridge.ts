@@ -24,7 +24,7 @@ export type Send = ({
   toAddress: string;
   toConversationId?: string;
   msg: string;
-}) => Promise<void>;
+}) => Promise<DecodedMessage>;
 
 export type Handler = ({
   bridge,
@@ -74,7 +74,7 @@ export const bridge = async (opts: {
       })()
     );
 
-    await conversation.send(msg);
+    return conversation.send(msg);
   };
   return {
     sentry: opts.sentry,

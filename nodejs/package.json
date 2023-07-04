@@ -14,8 +14,11 @@
     "prod:bridge:nuke": ". ../shell/env.sh && ../shell/prod/bridge.nuke.sh",
     "prod:api:deploy": ". ../shell/env.sh && ../shell/prod/api.deploy.sh",
     "prod:api:nuke": ". ../shell/env.sh && ../shell/prod/api.nuke.sh",
-    "docker:test:smoke": ". ../shell/env.sh && ../shell/docker/smoke.sh",
-    "docker:test:down": ". ../shell/env.sh && docker compose -f ../docker/docker-compose.test.yml down",
+    "docker:api:up": ". ../shell/env.sh && ../shell/docker/api.up.sh",
+    "docker:api:test": ". ../shell/env.sh && mocha -g 'Use the API'",
+    "docker:bridge:up": ". ../shell/env.sh && ../shell/docker/bridge.up.sh",
+    "docker:bridge:test": ". ../shell/env.sh && mocha -g 'Use the bridge'",
+    "docker:down": ". ../shell/env.sh && docker compose -f ../docker/docker-compose.test.yml down",
     "static:tsc": "prisma generate && tsc",
     "static:eslint": "eslint .",
     "static:prettier": "prettier --check ."
