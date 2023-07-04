@@ -141,6 +141,12 @@ describe("Use the bridge", () => {
       }),
     });
 
+    if (response.status !== 200) {
+      console.log(response.status);
+      console.log(await response.json());
+      throw new Error(`/hook API returned ${response.status}`);
+    }
+
     const json = await response.json();
 
     /* eslint-disable-next-line no-console */
