@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { z } from "zod";
 import fetch from "node-fetch";
 import { Wallet } from "@ethersproject/wallet";
@@ -73,6 +74,12 @@ describe("Use the API", () => {
         httpUrl: `http://api:3000/canary`,
       }),
     });
+
+    if (response.status !== 200) {
+      console.log(response.status);
+      console.log(await response.json());
+      throw new Error(`Signup returned ${response.status}`);
+    }
 
     const zResponse = z.object({
       ethAddress: z.string(),
