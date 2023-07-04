@@ -60,6 +60,7 @@ jobs:
           npm run static:tsc
       - name: smoke tests
         run: |
+          cd nodejs
           npm run docker:test:smoke
 
       
