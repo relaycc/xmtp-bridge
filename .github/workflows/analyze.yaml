@@ -61,6 +61,9 @@ jobs:
       - name: smoke tests
         run: |
           cd nodejs
-          npm run docker:test:smoke
+          npm run docker:api:up
+          npm run docker:api:test
+          npm run docker:bridge:up
+          npm run docker:bridge:test
 
       
