@@ -1,0 +1,46 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=${XMTPB_POSTGRES_USER}
+      - POSTGRES_PASSWORD=${XMTPB_POSTGRES_PASSWORD}
+  prisma:
+    image: xmtp-bridge-prisma:${XMTPB_IMAGE_TAG}
+    build:
+      context: "../nodejs"
+      dockerfile: "../docker/Dockerfile.prisma"
+    environment:
+      - XMTPB_PG_CONNECTION_STRING
+    depends_on:
+      - postgres
+  bridge:
+    image: "bridge:${XMTPB_IMAGE_TAG}"
+    build:
+      context: "../nodejs"
+      dockerfile: "../docker/Dockerfile"
+    command: "node build/src/apps/bridge.js"
+    environment:
+      - XMTPB_BRIDGE_ADDRESS
+      - XMTPB_WEBHOOK_KEY
+      - XMTPB_PG_CONNECTION_STRING
+    depends_on:
+      - postgres
+      - prisma
+  api:
+    image: "bridge-api:${XMTPB_IMAGE_TAG}"
+    build:
+      context: "../nodejs"
+      dockerfile: "../docker/Dockerfile"
+    command: "node build/src/apps/api.js"
+    ports:
+      - ${XMTPB_API_PORT}:${XMTPB_API_PORT}
+    environment:
+      - XMTPB_API_URL
+      - XMTPB_API_PORT
+      - XMTPB_WEBHOOK_KEY
+      - XMTPB_SIGNUP_KEY
+      - XMTPB_PG_CONNECTION_STRING
+    depends_on:
+      - postgres
+      - prisma
