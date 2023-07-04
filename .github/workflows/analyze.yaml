@@ -1,0 +1,66 @@
+name: Analyze
+
+on:
+  pull_request:
+    types: []
+
+
+jobs:
+  eslint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18.15.0
+      - name: eslint
+        run: |
+          cd nodejs
+          npm i
+          npm run static:eslint
+  prettier:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18.15.0
+      - name: prettier
+        run: |
+          cd nodejs
+          npm i
+          npm run static:prettier
+  tsc:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18.15.0
+      - name: tsc
+        run: |
+          cd nodejs
+          npm i
+          npm run static:tsc
+  smoke-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18.15.0
+      - name: tsc
+        run: |
+          cd nodejs
+          npm i
+          npm run static:tsc
+      - name: smoke tests
+        run: |
+          cd nodejs
+          npm run docker:test:smoke
+
+      

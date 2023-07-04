@@ -7,24 +7,18 @@
     "node": ">=18.15.0"
   },
   "scripts": {
-    "dev:tsc": "tsc --watch",
+    "dev:tsc": "npx prisma generate && tsc --watch",
     "dev:bridge": ". ../shell/env.sh && nodemon build/src/apps/bridge.js",
     "dev:api": ". ../shell/env.sh && nodemon build/src/apps/api.js",
     "prod:bridge:deploy": ". ../shell/env.sh && ../shell/prod/bridge.deploy.sh",
     "prod:bridge:nuke": ". ../shell/env.sh && ../shell/prod/bridge.nuke.sh",
     "prod:api:deploy": ". ../shell/env.sh && ../shell/prod/api.deploy.sh",
     "prod:api:nuke": ". ../shell/env.sh && ../shell/prod/api.nuke.sh",
-    "test:e2e": ". ../shell/env.sh && mocha",
-    "test:dev": ". ../shell/env.sh && mocha",
-    "test:bench": ". ../shell/env.sh && mocha",
-    "static:build": "prisma generate && tsc",
-    "lint": "eslint .",
-    "prettier": "prettier --check .",
-    "prettier:fix": "prettier . --write",
-    "typecheck": "tsc --emitDeclarationOnly false --noEmit",
-    "sanity": "npm run lint && npm run prettier && npm run typecheck && npm run build",
-    "patch": "npm version patch -m 'patch: Bump version to %s'",
-    "pub": "npm run sanity && npm run patch && npm publish --access public"
+    "docker:test:smoke": ". ../shell/env.sh && ../shell/docker/smoke.sh",
+    "docker:test:down": ". ../shell/env.sh && docker compose -f ../docker/docker-compose.test.yml down",
+    "static:tsc": "prisma generate && tsc",
+    "static:eslint": "eslint .",
+    "static:prettier": "prettier --check ."
   },
   "repository": {
     "type": "git",
