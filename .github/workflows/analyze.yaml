@@ -57,7 +57,7 @@ jobs:
         run: |
           cd nodejs
           npm i
-          npm run static:build
+          npm run static:tsc
       - name: test
         run: |
           npm run docker:test:smoke
