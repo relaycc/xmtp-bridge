@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   api:
-    image: "bridge-api:${XMTPB_GITHUB_SHA}"
+    image: "bridge-api:${XMTPB_IMAGE_TAG}"
     build:
       context: "../nodejs"
       dockerfile: "../docker/Dockerfile"
@@ -9,6 +9,8 @@ services:
     ports:
       - ${XMTPB_API_PORT}:${XMTPB_API_PORT}
     environment:
+      - XMTPB_SENTRY_DSN
+      - XMTPB_PG_CONNECTION_STRING
       - XMTPB_API_URL
       - XMTPB_API_PORT
       - XMTPB_WEBHOOK_KEY
@@ -16,6 +18,8 @@ services:
       - VIRTUAL_HOST=${XMTPB_VIRTUAL_HOST}
       - VIRTUAL_PORT=${XMTPB_VIRTUAL_PORT}
       - LETSENCRYPT_HOST=${XMTPB_LETSENCRYPT_HOST}
+    depends_on:
+      - prisma
   nginx-proxy:
     image: nginxproxy/nginx-proxy
     ports:

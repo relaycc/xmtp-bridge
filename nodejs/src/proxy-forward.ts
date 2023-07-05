@@ -74,7 +74,17 @@ export const zMapTargetResponseToContent = zTargetResponsePayload.transform(
 );
 
 export const handler =
-  ({ blacklist, targetUrl }: { blacklist: string[]; targetUrl: string }) =>
+  ({
+    whitelist,
+    blacklist,
+    targetUrl,
+    isBot,
+  }: {
+    whitelist?: string[];
+    blacklist: string[];
+    targetUrl: string;
+    isBot: boolean;
+  }) =>
   async ({
     message,
     bridge,
@@ -83,6 +93,10 @@ export const handler =
     message: DecodedMessage;
   }): Promise<void> => {
     if (blacklist.includes(message.senderAddress)) {
+      return;
+    }
+
+    if (whitelist !== undefined && !whitelist.includes(message.senderAddress)) {
       return;
     }
 
@@ -106,5 +120,12 @@ export const handler =
       schema: zMapTargetResponseToContent,
     });
 
-    await reply({ to: message, msg: content });
+    if (isBot) {
+      await reply({ to: message, msg: content });
+    } else {
+      /* eslint-disable no-console */
+      console.log(
+        "Forwarded message to target, but not responding because isBot = false"
+      );
+    }
   };

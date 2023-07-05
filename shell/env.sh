@@ -89,6 +89,7 @@ fi
 
 export XMTPB_VIRTUAL_HOST=${_XMTPB_VIRTUAL_HOST}
 
+
 #
 # LETSENCRYPT_HOST is the domain name that the bridge will be hosted on.
 #
@@ -99,6 +100,17 @@ if [ -z "${_XMTPB_LETSENCRYPT_HOST}" ]; then
 fi
 
 export XMTPB_LETSENCRYPT_HOST=${_XMTPB_LETSENCRYPT_HOST}
+
+#
+# XMTPB_VIRTUAL_PORT is the port that the API server will listen to
+#
+#
+
+if [ -z "${_XMTPB_VIRTUAL_PORT}" ]; then
+  echo "WARNING :: XMTPB_VIRTUAL_PORT is not set"
+fi
+
+export XMTPB_VIRTUAL_PORT=${_XMTPB_VIRTUAL_PORT}
 
 #
 # SSH_HOST is the SSH alias we use to connect to the prod server.
@@ -154,3 +166,36 @@ if [ -z "${_XMTPB_POSTGRES_PASSWORD}" ]; then
 fi
 
 export XMTPB_POSTGRES_PASSWORD=${_XMTPB_POSTGRES_PASSWORD}
+
+#
+# XMTPB_WORKBENCH_ID is the ID of the workbench we want to use for testing.
+#
+#
+
+if [ -z "${_XMTPB_WORKBENCH_ID}" ]; then
+  echo "WARNING :: XMTPB_WORKBENCH_ID is not set"
+fi
+
+export XMTPB_WORKBENCH_ID=${_XMTPB_WORKBENCH_ID}
+
+#
+# XMTPB_DROPLET_PK is the SSH key used to connect to the prod droplet
+#
+#
+
+if [ -z "${_XMTPB_DROPLET_PK}" ]; then
+  echo "WARNING :: XMTPB_DROPLET_PK is not set"
+fi
+
+export XMTPB_DROPLET_PK=${_XMTPB_DROPLET_PK}
+
+#
+# XMTPB_DROPLET_IP is the IP address of the prod droplet
+#
+#
+
+if [ -z "${_XMTPB_DROPLET_IP}" ]; then
+  echo "WARNING :: XMTPB_DROPLET_IP is not set"
+fi
+
+export XMTPB_DROPLET_IP=${_XMTPB_DROPLET_IP}

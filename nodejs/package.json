@@ -7,21 +7,27 @@
     "node": ">=18.15.0"
   },
   "scripts": {
+    "static:tsc": "prisma generate && tsc",
+    "static:eslint": "eslint .",
+    "static:prettier": "prettier --check .",
     "dev:tsc": "npx prisma generate && tsc --watch",
     "dev:bridge": ". ../shell/env.sh && nodemon build/src/apps/bridge.js",
     "dev:api": ". ../shell/env.sh && nodemon build/src/apps/api.js",
+    "dev:test": ". ../shell/env.sh && mocha ./mocha/dev.test.ts",
+    "prod:db:generate": ". ../shell/env.sh && npx prisma migrate dev --create-only",
+    "prod:db:deploy": ". ../shell/env.sh && npx prisma migrate deploy",
     "prod:bridge:deploy": ". ../shell/env.sh && ../shell/prod/bridge.deploy.sh",
+    "prod:bridge:test": ". ../shell/env.sh && mocha mocha/prod.bridge.test.ts",
     "prod:bridge:nuke": ". ../shell/env.sh && ../shell/prod/bridge.nuke.sh",
     "prod:api:deploy": ". ../shell/env.sh && ../shell/prod/api.deploy.sh",
     "prod:api:nuke": ". ../shell/env.sh && ../shell/prod/api.nuke.sh",
+    "prod:api:test": ". ../shell/env.sh && mocha mocha/prod.api.test.ts",
+    "prod:down": ". ../shell/env.sh && docker compose -f ../docker/docker-compose.api.yml down",
     "docker:api:up": ". ../shell/env.sh && ../shell/docker/api.up.sh",
-    "docker:api:test": ". ../shell/env.sh && mocha -g 'Use the API'",
+    "docker:api:test": ". ../shell/env.sh && mocha mocha/docker.test.ts -g 'Use the API'",
     "docker:bridge:up": ". ../shell/env.sh && ../shell/docker/bridge.up.sh",
-    "docker:bridge:test": ". ../shell/env.sh && mocha -g 'Use the bridge'",
-    "docker:down": ". ../shell/env.sh && docker compose -f ../docker/docker-compose.test.yml down",
-    "static:tsc": "prisma generate && tsc",
-    "static:eslint": "eslint .",
-    "static:prettier": "prettier --check ."
+    "docker:bridge:test": ". ../shell/env.sh && mocha mocha/docker.test.ts -g 'Use the Bridge'",
+    "docker:down": ". ../shell/env.sh && docker compose -f ../docker/docker-compose.test.yml down"
   },
   "repository": {
     "type": "git",

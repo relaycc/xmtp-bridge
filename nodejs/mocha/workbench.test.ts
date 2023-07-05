@@ -1,29 +1,42 @@
 /* eslint-disable no-console */
-import fetch from "node-fetch";
+import { prisma } from "../src/db.js";
 
-describe("Workbench:*", async () => {
-  it("Sign someone up", async () => {
-    const API_ENDPOINT = "http://localhost:3000";
-    const SIGNUP_KEY = "0xFAIL";
-    const TARGET_URL = "http://some-fun-server.com";
-    try {
-      const response = await fetch(`${API_ENDPOINT}/signup`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          key: SIGNUP_KEY,
-          httpUrl: TARGET_URL,
-        }),
-      });
-      if (response.status !== 200) {
-        throw new Error("Bad status code " + response.status);
-      } else {
-        console.log(await response.json());
+describe("Some production stats", () => {
+  it("Shows the number of instances", async () => {
+    const instances = await prisma.instance.findMany({
+      include: {
+        bridge: true,
+      },
+    });
+
+    console.log("Number of instances: " + instances.length);
+
+    const staleInstances = instances.filter((instance) => {
+      const now = new Date();
+      const heartbeat = new Date(instance.heartbeat);
+      const diff = now.getTime() - heartbeat.getTime();
+      return diff > 1000 * 60 * 2;
+    });
+    console.log("Number of stale instances: " + staleInstances.length);
+
+    for (const instance of staleInstances) {
+      console.log(`Stale instance: ${instance.id}`);
+    }
+  });
+
+  it("Shows the number of bridges", async () => {
+    const bridges = await prisma.bridge.findMany({
+      include: { instance: true },
+    });
+    console.log("Number of bridges: " + bridges.length);
+
+    const instances = await prisma.instance.findMany();
+    console.log("Number of instances: " + instances.length);
+
+    for (const bridge of bridges) {
+      if (bridge.instance === null) {
+        console.log(`Bridge without instance: ${bridge.id}`);
       }
-    } catch (e) {
-      throw e;
     }
   });
 });

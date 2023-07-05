@@ -1,5 +1,5 @@
+/* eslint-disable no-console */
 import { z } from "zod";
-import { Wallet } from "@ethersproject/wallet";
 import * as Sentry from "@sentry/node";
 
 Sentry.init({
@@ -8,30 +8,35 @@ Sentry.init({
 
 export const sentry = Sentry;
 
-const zBridgeEnv = z.object({
-  webhookAddress: z.string(),
-  bridgeAddress: z.string(),
-});
+const ENV_REGISTRY = {
+  XMTPB_SIGNUP_KEY: process.env.XMTPB_SIGNUP_KEY,
+  XMTPB_WEBHOOK_KEY: process.env.XMTPB_WEBHOOK_KEY,
+  XMTPB_BRIDGE_ADDRESS: process.env.XMTPB_BRIDGE_ADDRESS,
+  XMTPB_API_PORT: process.env.XMTPB_API_PORT,
+  XMTPB_FORWARD_HANDLER_HTTP_URL: process.env.XMTPB_FORWARD_HANDLER_HTTP_URL,
+  XMTPB_FORWARD_HANDLER_IS_BOT: process.env.XMTPB_FORWARD_HANDLER_IS_BOT,
+} as const;
 
-export const bridge = () => {
-  return zBridgeEnv.parse({
-    bridgeAddress: process.env.XMTPB_BRIDGE_ADDRESS,
-    webhookAddress: new Wallet(process.env.XMTPB_WEBHOOK_KEY as string).address,
-  });
-};
+for (const [key, value] of Object.entries(ENV_REGISTRY)) {
+  if (value === undefined) {
+    console.log(`WARNING :: process.env.${key} is not set`);
+  }
+}
 
-export const zApiEnv = z.object({
-  port: z.string(),
-  webhookAddress: z.string(),
-  webhookKey: z.string(),
-  signupKey: z.string(),
-});
-
-export const api = () => {
-  return zApiEnv.parse({
-    port: process.env.XMTPB_API_PORT,
-    webhookAddress: new Wallet(process.env.XMTPB_WEBHOOK_KEY as string).address,
-    webhookKey: process.env.XMTPB_WEBHOOK_KEY,
-    signupKey: process.env.XMTPB_SIGNUP_KEY,
-  });
+export const read = <Z extends z.ZodTypeAny>({
+  key,
+  schema,
+}: {
+  key: keyof typeof ENV_REGISTRY;
+  schema: Z;
+}): z.infer<typeof schema> => {
+  try {
+    return schema.parse(ENV_REGISTRY[key]);
+  } catch (e) {
+    console.log(
+      `ENV ERROR :: Tried to read key ${key} from process.env, but the passed schema failed to parse it`
+    );
+    console.log("The value was: " + ENV_REGISTRY[key]);
+    // throw e;
+  }
 };

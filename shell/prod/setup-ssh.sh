@@ -15,6 +15,11 @@ if [ -z "$XMTPB_SSH_HOST" ]; then
   exit 1
 fi
 
+if [ -z "$CI" ]; then
+  echo "This script is only meant to be run in CI, it could clobber your SSH config!"
+  exit 1
+fi
+
 mkdir -p ~/.ssh
 echo "${XMTPB_DROPLET_PK}" > ~/.ssh/${XMTPB_SSH_HOST}
 chmod 400 ~/.ssh/${XMTPB_SSH_HOST}

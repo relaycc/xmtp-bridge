@@ -7,12 +7,10 @@ import { v4 as uuid } from "uuid";
 import { writeFile, readFile } from "fs/promises";
 import * as Env from "../src/env.js";
 
-// TODO - I'm not a big fan of importing from src here, we want the application
-// to be mostly a black box, but it _might_ be ok to treat config as an exception.
-const env = Env.api();
-
 // TODO - We should NOT be reading directly from process.env.
 const API_BASE_URL = `http://localhost:${process.env.XMTPB_API_PORT}`;
+
+const SIGNUP_KEY = Env.read({ key: "XMTPB_SIGNUP_KEY", schema: z.string() });
 
 describe("Use the API", () => {
   it("GET /", async () => {
@@ -75,7 +73,7 @@ describe("Use the API", () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        key: env.signupKey,
+        key: SIGNUP_KEY,
         httpUrl: `http://api:3000/canary`,
       }),
     });

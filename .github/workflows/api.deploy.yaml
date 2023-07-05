@@ -1,0 +1,36 @@
+name: bridge_deploy
+
+on:
+  workflow_dispatch:
+
+env:
+  _XMTPB_DROPLET_PK: ${{ secrets.DEPLOY_XMTP_BRIDGE_DROPLET_PK }}
+  _XMTPB_DROPLET_IP: ${{ secrets.DEPLOY_XMTP_BRIDGE_DROPLET_IP }}
+  # TODO - Put this in a centralized source file
+  _XMTPB_SSH_HOST: target-droplet
+  _XMTPB_SENTRY_DSN: ${{ secrets.DEPLOY_XMTPB_SENTRY_DSN }}
+  _XMTPB_PG_CONNECTION_STRING: ${{ secrets.DEPLOY_XMTPB_PG_CONNECTION_STRING }}
+  _XMTPB_API_URL: ${{ vars._DEPLOY_XMTPB_API_URL }}}
+  _XMTPB_API_PORT: ${{ vars._DEPLOY_XMTPB_API_PORT }}}
+  _XMTPB_WEBHOOK_KEY: ${{ secrets.DEPLOY_XMTPB_WEBHOOK_KEY }}
+  _XMTPB_SIGNUP_KEY: ${{ secrets.DEPLOY_XMTPB_SIGNUP_KEY }}
+  _XMTPB_IMAGE_TAG: ${{ vars._DEPLOY_XMTPB_IMAGE_TAG }}}
+  _XMTPB_VIRTUAL_HOST: ${{ vars._DEPLOY_XMTPB_VIRTUAL_HOST }}}
+  _XMTPB_LETSENCRYPT_HOST: ${{ vars._DEPLOY_XMTPB_LETSENCRYPT_HOST }}}
+  _XMTPB_DEFAULT_EMAIL: ${{ vars._DEPLOY_XMTPB_DEFAULT_EMAIL }}}
+
+jobs:
+  deploy-api:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Deploy
+        run: |
+          cd nodejs
+          npm run prod:api:nuke
+          npm run prod:db:deploy
+          npm run prod:api:deploy
+
